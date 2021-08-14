@@ -20,6 +20,12 @@ namespace BirdAtlas.Api.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Retrieve a list of birds.
+        /// </summary>
+        /// <param name="page">Page count</param>
+        /// <param name="amount">Amount of birds per page</param>
+        /// <returns></returns>
         [HttpGet]
         public IEnumerable<Bird> List(int page = 0, int amount = 20)
         {
@@ -31,27 +37,65 @@ namespace BirdAtlas.Api.Controllers
             return BirdData.Birds.Skip(page * amount).Take(amount);
         }
 
+        /// <summary>
+        /// Get a single bird
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <returns>A bird if found</returns>
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Bird))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("{id}")]
-        public Bird Get(Guid id)
+        public ActionResult<Bird> Get(Guid id)
         {
-            return BirdData.Birds.SingleOrDefault(b => b.Id == id);
+            var bird = BirdData.Birds.SingleOrDefault(b => b.Id == id);
+            if (bird == null)
+                return NotFound();
+
+            return bird;
         }
 
+        /// <summary>
+        /// Register a new bird
+        /// </summary>
+        /// <param name="createBirdCommand">Required properties of a bird</param>
+        /// <returns>Bird object and location where to find the bird</returns>
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Bird))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]
-        public CreatedAtActionResult Create([FromBody] CreateBirdCommand createBirdCommand)
+        public IActionResult Create([FromBody] CreateBirdCommand createBirdCommand)
         {
             Bird newBird = new Bird {Id = Guid.NewGuid()}; // TODO map + insert
             return CreatedAtAction(nameof(Get), new {id = newBird.Id}, newBird);
         }
 
+        /// <summary>
+        /// Update the properties of a bird
+        /// </summary>
+        /// <param name="id">Bird's id</param>
+        /// <param name="bird">Complete bird object, no PATCH is supported.</param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPut("{id}")]
-        public OkResult Update(Guid id, [FromBody]Bird bird)
+        public IActionResult Update(Guid id, [FromBody]Bird bird)
         {
             return Ok();
         }
 
+        /// <summary>
+        /// Mark a bird as your favorite
+        /// </summary>
+        /// <param name="id">Bird's id</param>
+        /// <param name="favorite">Favorited value</param>
+        /// <returns></returns>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPut("{id}/favorite")]
-        public OkResult Favorite(Guid id, bool favorite)
+        public IActionResult Favorite(Guid id, bool favorite)
         {
             // this should of course be account-specific instead of shared once we save state
             var bird = BirdData.Birds.SingleOrDefault(b => b.Id == id);
