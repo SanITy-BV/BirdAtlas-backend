@@ -1,22 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using BirdAtlas.Api.Configuration;
-using Microsoft.Extensions.Options;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using BirdAtlas.Api.ConfigurationExtensions;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace BirdAtlas.Api
 {
@@ -32,8 +22,12 @@ namespace BirdAtlas.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string domain = "atlas"; // prefix that you can use to divide APIs in 'domains'. Can come from appsettings.
             services
-                .AddControllers()
+                .AddControllers(options =>
+                {
+                    options.UseGlobalRoutePrefix(new RouteAttribute(domain + "/v{version:apiVersion}"));
+                })
                 .AddJsonOptions(opts =>
                 {
                     var enumConverter = new JsonStringEnumConverter();
@@ -42,32 +36,21 @@ namespace BirdAtlas.Api
                 // .AddNewtonsoftJson(opts => opts.Converters.Add(new StringEnumConverter())); // or use Newtonsoft.Json
 
             services.AddOptions();
-            services.Configure<ApiInformation>(Configuration.GetSection(nameof(ApiInformation)));
-
-            services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-            services.AddSwaggerGen(c =>
-            {
-                // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
-            });
+            // moved API version and Swagger config in separate classes to keep Startup clean
+            services.AddApiVersionRegistration();
+            services.AddVersionedSwaggerRegistration(Configuration, typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "BirdAtlas.Api v1");
-                c.RoutePrefix = string.Empty;
-            });
+            // moved UseSwagger / UseSwaggerUI in separate method
+            app.AddVersionedSwaggerRegistration(provider);
 
             app.UseHttpsRedirection();
 

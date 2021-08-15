@@ -5,6 +5,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -17,14 +18,17 @@ namespace BirdAtlas.Api.Configuration
     /// </summary>
     public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
     {
+        private readonly IApiVersionDescriptionProvider _versionDescriptionProvider;
         private readonly ApiInformation _apiInformation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigureSwaggerOptions"/> class.
         /// </summary>
+        /// <param name="provider">The <see cref="IApiVersionDescriptionProvider">provider</see> used to generate Swagger documents.</param>
         /// <param name="apiInformation">The <see cref="ApiInformation"/> config section</param>
-        public ConfigureSwaggerOptions(IOptions<ApiInformation> apiInformation)
+        public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider, IOptions<ApiInformation> apiInformation)
         {
+            _versionDescriptionProvider = provider;
             _apiInformation = apiInformation?.Value;
 
             if (_apiInformation == null)
@@ -34,17 +38,22 @@ namespace BirdAtlas.Api.Configuration
         /// <inheritdoc />
         public void Configure(SwaggerGenOptions options)
         {
-            options.SwaggerDoc("v1", CreateInfoForApiVersion());
+            // add a swagger document for each discovered API version
+            // note: you might choose to skip or document deprecated API versions differently
+            foreach (var description in _versionDescriptionProvider.ApiVersionDescriptions)
+            {
+                options.SwaggerDoc(description.GroupName, CreateInfoForApiVersion(description));
+            }
         }
 
-        private OpenApiInfo CreateInfoForApiVersion()
+        private OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
         {
             var primaryContact = _apiInformation.Contacts.FirstOrDefault(p => p.IsPrimary) ?? _apiInformation.Contacts.FirstOrDefault();
 
             var info = new OpenApiInfo
             {
                 Title = _apiInformation.Title,
-                Version = "v1",
+                Version = description.ApiVersion.ToString(),
                 Description = _apiInformation.Description,
                 Contact = new OpenApiContact { Name = primaryContact?.Name, Email = primaryContact?.Email },
                 TermsOfService = !string.IsNullOrWhiteSpace(_apiInformation.TermsOfServiceUri) ?
