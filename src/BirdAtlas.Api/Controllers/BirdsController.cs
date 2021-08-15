@@ -51,7 +51,10 @@ namespace BirdAtlas.Api.Controllers
         {
             var bird = BirdData.Birds.SingleOrDefault(b => b.Id == id);
             if (bird == null)
+            {
+                _logger.LogWarning("Get Bird with invalid Id");
                 return NotFound();
+            }
 
             return bird;
         }

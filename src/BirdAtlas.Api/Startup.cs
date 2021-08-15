@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json.Serialization;
 using BirdAtlas.Api.ConfigurationExtensions;
+using BirdAtlas.Api.Middleware;
 using BirdAtlas.Api.Validators;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -25,6 +26,11 @@ namespace BirdAtlas.Api
         public void ConfigureServices(IServiceCollection services)
         {
             string domain = "atlas"; // prefix that you can use to divide APIs in 'domains'. Can come from appsettings.
+
+            // Starting from Microsoft.ApplicationInsights.AspNetCore version 2.15.0, calling services.AddApplicationInsightsTelemetry() will automatically read the instrumentation key 
+            // from Microsoft.Extensions.Configuration.IConfiguration of the application. There is no need to explicitly provide the IConfiguration.
+            services.AddApplicationInsightsTelemetry();
+
             services
                 .AddControllers(options =>
                 {
@@ -51,7 +57,8 @@ namespace BirdAtlas.Api
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
+                app.UseExceptionHandler(errorHandler => errorHandler.UseMiddleware<GlobalExceptionHandlerMiddleware>());
             }
 
             // moved UseSwagger / UseSwaggerUI in separate method
