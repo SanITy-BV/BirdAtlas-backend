@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace BirdAtlas.Api.Models
+﻿namespace BirdAtlas.Api.Models
 {
     /// <summary>
     /// Model with required properties to create a new bird registration.
@@ -11,28 +8,21 @@ namespace BirdAtlas.Api.Models
         /// <summary>
         /// Bird's binomial name.
         /// </summary>
-        [Required]
-        [MaxLength(50)]
         public string Binomial { get; set; }
 
         /// <summary>
         /// Bird's habitat.
         /// </summary>
-        [Required]
         public HabitatType Habitat { get; set; }
 
         /// <summary>
         /// Bird's diet.
         /// </summary>
-        [Required]
-        [MaxLength(50)]
         public string Diet { get; set; }
 
         /// <summary>
         /// Bird's nesting habits.
         /// </summary>
-        [Required]
-        [MaxLength(20)]
         public string Nesting { get; set; }
 
         /// <summary>

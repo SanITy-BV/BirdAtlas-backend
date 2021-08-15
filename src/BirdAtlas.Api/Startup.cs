@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Text.Json.Serialization;
 using BirdAtlas.Api.ConfigurationExtensions;
+using BirdAtlas.Api.Validators;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace BirdAtlas.Api
@@ -32,8 +34,11 @@ namespace BirdAtlas.Api
                 {
                     var enumConverter = new JsonStringEnumConverter();
                     opts.JsonSerializerOptions.Converters.Add(enumConverter);
-                });
+                })
                 // .AddNewtonsoftJson(opts => opts.Converters.Add(new StringEnumConverter())); // or use Newtonsoft.Json
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateBirdValidator>(
+                        lifetime: ServiceLifetime.Singleton));
+
 
             services.AddOptions();
             // moved API version and Swagger config in separate classes to keep Startup clean
