@@ -45,6 +45,7 @@ namespace BirdAtlas.Api
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateBirdValidator>(
                         lifetime: ServiceLifetime.Singleton));
 
+            services.AddHealthCheckConfiguration(Configuration);
 
             services.AddOptions();
             // moved API version and Swagger config in separate classes to keep Startup clean
@@ -73,6 +74,7 @@ namespace BirdAtlas.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
             });
         }
     }
