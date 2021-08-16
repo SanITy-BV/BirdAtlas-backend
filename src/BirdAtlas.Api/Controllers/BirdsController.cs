@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using BirdAtlas.Api.Data;
 using BirdAtlas.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Identity.Web.Resource;
 
 namespace BirdAtlas.Api.Controllers
 {
@@ -64,6 +66,7 @@ namespace BirdAtlas.Api.Controllers
         /// </summary>
         /// <param name="createBirdCommand">Required properties of a bird</param>
         /// <returns>Bird object and location where to find the bird</returns>
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Bird))]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -71,6 +74,8 @@ namespace BirdAtlas.Api.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] CreateBirdCommand createBirdCommand)
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "BirdAtlas.API.Admins" });
+
             Bird newBird = new Bird {Id = Guid.NewGuid()}; // TODO map + insert
             return CreatedAtAction(nameof(Get), new {id = newBird.Id}, newBird);
         }
@@ -81,6 +86,7 @@ namespace BirdAtlas.Api.Controllers
         /// <param name="id">Bird's id</param>
         /// <param name="bird">Complete bird object, no PATCH is supported.</param>
         /// <returns></returns>
+        [Authorize]
         [Obsolete]
         [ApiVersion("1.0")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -90,6 +96,8 @@ namespace BirdAtlas.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateDeprecated(Guid id, [FromBody]Bird bird)
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "BirdAtlas.API.Admins" });
+
             return Ok();
         }
 
@@ -99,6 +107,7 @@ namespace BirdAtlas.Api.Controllers
         /// <param name="id">Bird's id</param>
         /// <param name="updateBirdCommand">Updateable properties of a bird, no PATCH is supported.</param>
         /// <returns></returns>
+        [Authorize]
         [ApiVersion("2.0")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -107,6 +116,8 @@ namespace BirdAtlas.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult Update(Guid id, [FromBody] UpdateBirdCommand updateBirdCommand)
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "BirdAtlas.API.Admins" });
+
             return Ok();
         }
 
@@ -116,6 +127,7 @@ namespace BirdAtlas.Api.Controllers
         /// <param name="id">Bird's id</param>
         /// <param name="favorite">Favorited value</param>
         /// <returns></returns>
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPut("{id}/favorite")]
