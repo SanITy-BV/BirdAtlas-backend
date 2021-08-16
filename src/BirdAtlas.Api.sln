@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31313.79
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BirdAtlas.Api", "BirdAtlas.Api\BirdAtlas.Api.csproj", "{1372D14A-46A7-4D02-8408-BC988D87492E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BirdAtlas.Api", "BirdAtlas.Api\BirdAtlas.Api.csproj", "{1372D14A-46A7-4D02-8408-BC988D87492E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BirdAtlas.Api.IntegrationTests", "BirdAtlas.Api.IntegrationTests\BirdAtlas.Api.IntegrationTests.csproj", "{57A01BCC-A659-40DD-86B0-F2C5230FC2EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{1372D14A-46A7-4D02-8408-BC988D87492E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1372D14A-46A7-4D02-8408-BC988D87492E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1372D14A-46A7-4D02-8408-BC988D87492E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57A01BCC-A659-40DD-86B0-F2C5230FC2EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57A01BCC-A659-40DD-86B0-F2C5230FC2EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57A01BCC-A659-40DD-86B0-F2C5230FC2EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57A01BCC-A659-40DD-86B0-F2C5230FC2EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
