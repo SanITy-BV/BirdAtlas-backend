@@ -9,7 +9,9 @@ using BirdAtlas.Api.ConfigurationExtensions;
 using BirdAtlas.Api.Middleware;
 using BirdAtlas.Api.Validators;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Identity.Web;
 
 namespace BirdAtlas.Api
 {
@@ -30,6 +32,10 @@ namespace BirdAtlas.Api
             // Starting from Microsoft.ApplicationInsights.AspNetCore version 2.15.0, calling services.AddApplicationInsightsTelemetry() will automatically read the instrumentation key 
             // from Microsoft.Extensions.Configuration.IConfiguration of the application. There is no need to explicitly provide the IConfiguration.
             services.AddApplicationInsightsTelemetry();
+
+            // Add AAD security
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAd"));
 
             services
                 .AddControllers(options =>
@@ -74,12 +80,14 @@ namespace BirdAtlas.Api
             }
 
             // moved UseSwagger / UseSwaggerUI in separate method
-            app.AddVersionedSwaggerRegistration(provider);
+            app.AddVersionedSwaggerRegistration(provider, Configuration);
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
             app.UseCors();
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using BirdAtlas.Api.Configuration;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace BirdAtlas.Api.ConfigurationExtensions
@@ -43,8 +45,34 @@ namespace BirdAtlas.Api.ConfigurationExtensions
                         options.IncludeXmlComments(GetXmlCommentsFilePath(type));
                     }
 
-                    // TODO add AddSecurityDefinition if you implement security
-                    // https://github.com/domaindrivendev/Swashbuckle.AspNetCore#add-security-definitions-and-requirements
+                    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                    {
+                        Description = "OAuth2.0 Auth Code with PKCE",
+                        Name = "oauth2",
+                        Type = SecuritySchemeType.OAuth2,
+                        Flows = new OpenApiOAuthFlows
+                        {
+                            AuthorizationCode = new OpenApiOAuthFlow
+                            {
+                                AuthorizationUrl = new Uri(configuration["AuthorizationUrl"]),
+                                TokenUrl = new Uri(configuration["TokenUrl"]),
+                                Scopes = new Dictionary<string, string>
+                                {
+                                    { configuration["ApiScope"], "read the api" }
+                                }
+                            }
+                        }
+                    });
+                    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "oauth2" }
+                            },
+                            new[] { configuration["ApiScope"] }
+                        }
+                    });
                 });
 
             return services;
@@ -55,10 +83,11 @@ namespace BirdAtlas.Api.ConfigurationExtensions
         /// </summary>
         /// <param name="app">Reference for <see cref="IApplicationBuilder"/>.</param>
         /// <param name="provider">Reference for <see cref="IApiVersionDescriptionProvider"/> to apply versioning.</param>
+        /// <param name="configuration">Configuration</param>
         /// <param name="swaggerRoutePrefix">Swagger options RoutePrefix, default string.Empty to serve Swagger at the application root.</param>
         /// <returns></returns>
         public static IApplicationBuilder AddVersionedSwaggerRegistration(this IApplicationBuilder app, IApiVersionDescriptionProvider provider,
-            string swaggerRoutePrefix = "")
+            IConfiguration configuration, string swaggerRoutePrefix = "")
         {
             app.UseSwagger();
             app.UseSwaggerUI(
@@ -71,7 +100,9 @@ namespace BirdAtlas.Api.ConfigurationExtensions
                         options.RoutePrefix = swaggerRoutePrefix;
                     }
 
-                    // TODO add security https://github.com/domaindrivendev/Swashbuckle.AspNetCore#enable-oauth20-flows
+                    options.OAuthClientId(configuration["OpenIdClientId"]);
+                    options.OAuthUsePkce();
+                    options.OAuthScopeSeparator(" ");
                 });
 
             return app;
