@@ -45,6 +45,17 @@ namespace BirdAtlas.Api
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateBirdValidator>(
                         lifetime: ServiceLifetime.Singleton));
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "CORSPolicy",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:4200")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                    });
+            });
+
             services.AddHealthCheckConfiguration(Configuration);
 
             services.AddOptions();
@@ -68,7 +79,7 @@ namespace BirdAtlas.Api
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            app.UseCors();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

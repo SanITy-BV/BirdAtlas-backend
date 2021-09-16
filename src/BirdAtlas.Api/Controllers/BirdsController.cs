@@ -6,6 +6,7 @@ using System.Linq;
 using BirdAtlas.Api.Data;
 using BirdAtlas.Api.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Cors;
 
 namespace BirdAtlas.Api.Controllers
 {
@@ -13,6 +14,7 @@ namespace BirdAtlas.Api.Controllers
     [ApiVersion("2.0")]
     [ApiController]
     [Route("[controller]")]
+    [EnableCors("CORSPolicy")]
     public class BirdsController : ControllerBase
     {
         private readonly ILogger<BirdsController> _logger;
