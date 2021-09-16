@@ -74,10 +74,17 @@ namespace BirdAtlas.Api.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] CreateBirdCommand createBirdCommand)
         {
-            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "BirdAtlas.API.Admins" });
+            // in case you want to verify scopes (limit application functionality by client)
+            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "api.read" });
 
-            Bird newBird = new Bird {Id = Guid.NewGuid()}; // TODO map + insert
-            return CreatedAtAction(nameof(Get), new {id = newBird.Id}, newBird);
+            // in case you want to verify user roles (limit functionality on user permissions).
+            if (User.IsInRole("BirdAtlas.API.Admins")) // or use Policy [Authorize(Policy = AuthorizationPolicies.Admin)]
+            {
+                Bird newBird = new Bird { Id = Guid.NewGuid() }; // TODO map + insert
+                return CreatedAtAction(nameof(Get), new { id = newBird.Id }, newBird);
+            }
+
+            return new ForbidResult();
         }
 
         /// <summary>
