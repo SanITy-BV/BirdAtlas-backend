@@ -104,12 +104,8 @@ namespace BirdAtlas.Api
             app.AddVersionedSwaggerRegistration(provider, Configuration);
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
             app.UseCors();
-
-            app.UseCors();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
