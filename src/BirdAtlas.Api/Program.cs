@@ -2,6 +2,8 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using BirdAtlas.Api.Configuration;
 using BirdAtlas.Api.ConfigurationExtensions;
+using BirdAtlas.Api.Validators;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -26,9 +28,11 @@ namespace BirdAtlas.Api
                 {
                     var enumConverter = new JsonStringEnumConverter();
                     opts.JsonSerializerOptions.Converters.Add(enumConverter);
-                });
-            // .AddNewtonsoftJson(opts => opts.Converters.Add(new StringEnumConverter())); // or use Newtonsoft.Json
-            
+                })
+                // .AddNewtonsoftJson(opts => opts.Converters.Add(new StringEnumConverter())); // or use Newtonsoft.Json
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateBirdValidator>(
+                    lifetime: ServiceLifetime.Singleton));
+
             builder.Services.AddEndpointsApiExplorer(); // created to support Minimal API, see https://stackoverflow.com/questions/71932980/what-is-addendpointsapiexplorer-in-asp-net-core-6
 
             builder.Services.AddOptions();
