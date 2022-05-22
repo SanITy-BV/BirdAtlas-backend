@@ -47,6 +47,8 @@ namespace BirdAtlas.Api
             // from Microsoft.Extensions.Configuration.IConfiguration of the application. There is no need to explicitly provide the IConfiguration.
             builder.Services.AddApplicationInsightsTelemetry();
 
+            builder.Services.AddHealthCheckConfiguration(builder.Configuration);
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -63,6 +65,7 @@ namespace BirdAtlas.Api
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHealthChecks("/health");
 
             app.Run();
         }
