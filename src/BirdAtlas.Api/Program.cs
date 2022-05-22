@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using BirdAtlas.Api.Configuration;
 using BirdAtlas.Api.ConfigurationExtensions;
+using BirdAtlas.Api.Middleware;
 using BirdAtlas.Api.Validators;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
@@ -42,12 +43,17 @@ namespace BirdAtlas.Api
             builder.Services.AddApiVersionRegistration();
             builder.Services.AddVersionedSwaggerRegistration(builder.Configuration, typeof(Program));
 
+            // Starting from Microsoft.ApplicationInsights.AspNetCore version 2.15.0, calling services.AddApplicationInsightsTelemetry() will automatically read the instrumentation key 
+            // from Microsoft.Extensions.Configuration.IConfiguration of the application. There is no need to explicitly provide the IConfiguration.
+            builder.Services.AddApplicationInsightsTelemetry();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage(); // added for debugging purposes
+                //app.UseDeveloperExceptionPage(); // added for debugging purposes
+                app.UseExceptionHandler(errorHandler => errorHandler.UseMiddleware<GlobalExceptionHandlerMiddleware>());
             }
 
             app.UseVersionedSwaggerUI();
