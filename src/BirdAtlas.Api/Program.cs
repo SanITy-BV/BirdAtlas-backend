@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using BirdAtlas.Api.Configuration;
+using BirdAtlas.Api.ConfigurationExtensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -14,30 +16,27 @@ namespace BirdAtlas.Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            string domain = "atlas";
             builder.Services
-                .AddControllers()
+                .AddControllers(options =>
+                {
+                    options.UseGlobalRoutePrefix(new RouteAttribute(domain + "/v{version:apiVersion}"));
+                })
                 .AddJsonOptions(opts =>
                 {
                     var enumConverter = new JsonStringEnumConverter();
                     opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 });
             // .AddNewtonsoftJson(opts => opts.Converters.Add(new StringEnumConverter())); // or use Newtonsoft.Json
+            
+            builder.Services.AddEndpointsApiExplorer(); // created to support Minimal API, see https://stackoverflow.com/questions/71932980/what-is-addendpointsapiexplorer-in-asp-net-core-6
 
             builder.Services.AddOptions();
             builder.Services.Configure<ApiInformation>(builder.Configuration.GetSection(nameof(ApiInformation)));
 
-            builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
-            });
+            // moved API version and Swagger config in separate classes to keep Program clean
+            builder.Services.AddApiVersionRegistration();
+            builder.Services.AddVersionedSwaggerRegistration(builder.Configuration, typeof(Program));
 
             var app = builder.Build();
 
@@ -47,12 +46,7 @@ namespace BirdAtlas.Api
                 app.UseDeveloperExceptionPage(); // added for debugging purposes
             }
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "BirdAtlas.Api v1");
-                c.RoutePrefix = string.Empty;
-            });
+            app.UseVersionedSwaggerUI();
 
             app.UseHttpsRedirection();
 
