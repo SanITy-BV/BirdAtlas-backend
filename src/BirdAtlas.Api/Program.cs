@@ -25,6 +25,17 @@ namespace BirdAtlas.Api
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: "CORSPolicy",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:4200")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                    });
+            });
+
             string domain = "atlas";
             builder.Services
                 .AddControllers(options =>
@@ -68,6 +79,7 @@ namespace BirdAtlas.Api
 
             app.UseHttpsRedirection();
 
+            app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
 
