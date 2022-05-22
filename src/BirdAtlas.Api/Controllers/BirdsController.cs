@@ -6,6 +6,7 @@ using System.Linq;
 using BirdAtlas.Api.Data;
 using BirdAtlas.Api.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Identity.Web.Resource;
 
@@ -14,6 +15,7 @@ namespace BirdAtlas.Api.Controllers
     [ApiVersion("1.0")]
     [ApiVersion("2.0")]
     [ApiController]
+    [EnableCors("CORSPolicy")]
     [Route("[controller]")]
     public class BirdsController : ControllerBase
     {
