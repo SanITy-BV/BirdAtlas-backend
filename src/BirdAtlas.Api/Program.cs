@@ -5,8 +5,10 @@ using BirdAtlas.Api.ConfigurationExtensions;
 using BirdAtlas.Api.Middleware;
 using BirdAtlas.Api.Validators;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -19,6 +21,10 @@ namespace BirdAtlas.Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            // Add AAD security
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
             string domain = "atlas";
             builder.Services
                 .AddControllers(options =>
@@ -62,6 +68,7 @@ namespace BirdAtlas.Api
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
