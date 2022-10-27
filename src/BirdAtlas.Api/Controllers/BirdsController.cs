@@ -96,7 +96,7 @@ namespace BirdAtlas.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateDeprecated(Guid id, [FromBody]Bird bird)
         {
-            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "BirdAtlas.API.Admins" });
+            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "api.read" });
 
             return Ok();
         }
@@ -116,7 +116,7 @@ namespace BirdAtlas.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult Update(Guid id, [FromBody] UpdateBirdCommand updateBirdCommand)
         {
-            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "BirdAtlas.API.Admins" });
+            HttpContext.VerifyUserHasAnyAcceptedScope(new string[] { "api.read" });
 
             return Ok();
         }
